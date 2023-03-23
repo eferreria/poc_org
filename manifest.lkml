@@ -12,3 +12,9 @@ visualization: {
   label: "Tree Map"
   file: "visualizations/treemap.js"
 }
+
+visualization: {
+  id: "force_directed"
+  label: "Force Directed Graph"
+  file: "visualizations/forced_directed.js"
+}
