@@ -85,12 +85,26 @@ derived_table: {
 
   dimension: company {
     type: number
-    sql: right(cast(abs(farm_fingerprint(concat(${country}, ${contingent_worker_supplier}))) as string),3) ;;
+    sql: right(cast(abs(farm_fingerprint(${country})) as string),3) ;;
   }
 
   dimension: division {
     type: number
-    sql: right(cast(abs(farm_fingerprint(${state})) as string),1) ;;
+    sql: round(cast(right(cast(abs(farm_fingerprint(${state})) as string),1) as numeric)/2) ;;
+  }
+
+  dimension: funding_organization {
+    type: string
+    sql:
+    case ${division}
+      when 0 then 'International'
+      when 1 then 'Canada'
+      when 2 then 'Technology'
+      when 3 then 'Consumer Information Solutions'
+      when 4 then 'EWS'
+      when 5 then 'USIS'
+    end
+    ;;
   }
 
   dimension: cost_center {
@@ -183,6 +197,18 @@ derived_table: {
     hidden: yes
     type: number
     sql: ${TABLE}.fte_rand ;;
+  }
+
+  dimension: dev_vs_cogs {
+    label: "Dev vs COGS"
+    type: string
+    sql:
+    case
+      when ${core_prod_cte} + ${core_prod_cte} > 0 then 'COGS'
+      when ${core_dev_cte} + ${core_dev_fte} > 0 then 'PI'
+      else 'One Time (PI)'
+    end
+    ;;
   }
 
 
