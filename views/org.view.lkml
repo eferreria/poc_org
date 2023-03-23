@@ -166,36 +166,36 @@ derived_table: {
 
   dimension: core_prod_fte  {
     label: "Core PROD (COGS) FTE"
-    sql:  case when ${fte_rand} >= 0 and ${fte_rand} < 5 then 1 else 0 end  ;;
+    sql:  case when ${fte_rand} >= 0 and ${fte_rand} < 6 then 1 else 0 end  ;;
   }
 
   dimension: core_prod_cte {
     label: "Core PROD (COGS) CTE"
-    sql:  case when ${fte_rand} >= 5 and ${fte_rand} < 4 then 1 else 0 end  ;;
+    sql:  case when ${fte_rand} >= 6 and ${fte_rand} < 5 then 1 else 0 end  ;;
   }
 
   dimension: core_dev_fte {
-    sql:  case when ${fte_rand} >= 4 and ${fte_rand} < 7 then 1 else 0 end  ;;
+    sql:  case when ${fte_rand} >= 5 and ${fte_rand} < 8 then 1 else 0 end  ;;
     label: "Core DEV (PI) FTE"
   }
 
   dimension: core_dev_cte {
-    sql:  case when ${fte_rand} >= 7 and ${fte_rand} < 8 then 1 else 0 end  ;;
+    sql:  case when ${fte_rand} >= 8 and ${fte_rand} < 9 then 1 else 0 end  ;;
     label: "Core DEV (PI) CTE"
   }
 
   dimension: ma_one_time_fte  {
-    sql:  case when ${fte_rand} >= 8 and ${fte_rand} < 9 then 1 else 0 end  ;;
+    sql:  case when ${fte_rand} >= 9 and ${fte_rand} < 10 then 1 else 0 end  ;;
     label: "M&A One Time FTE"
   }
 
   dimension: ma_one_time_cte  {
-    sql:  case when ${fte_rand} >= 9 and ${fte_rand} < 10 then 1 else 0 end  ;;
+    sql:  case when ${fte_rand} >= 10 and ${fte_rand} < 11 then 1 else 0 end  ;;
     label: "M&A One Time CTE"
   }
 
   dimension: fte_rand {
-    hidden: yes
+    # hidden: yes
     type: number
     sql: ${TABLE}.fte_rand ;;
   }
@@ -205,8 +205,8 @@ derived_table: {
     type: string
     sql:
     case
-      when ${core_prod_cte} + ${core_prod_cte} > 0 then 'COGS'
-      when ${core_dev_cte} + ${core_dev_fte} > 0 then 'PI'
+      when coalesce(${core_prod_cte},0) + coalesce(${core_prod_fte},0) > 0 then 'COGS'
+      when coalesce(${core_dev_cte},0) + coalesce(${core_dev_fte},0) > 0 then 'PI'
       else 'One Time (PI)'
     end
     ;;
