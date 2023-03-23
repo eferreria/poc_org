@@ -7,8 +7,8 @@
 #   project: "name_of_other_project"
 # }
 
-# visualization: {
-#   id: "treemap"
-#   label: "Tree Map"
-#   file: "visualizations/treemap.ts.lkml"
-# }
+visualization: {
+  id: "treemap"
+  label: "Tree Map"
+  file: "visualizations/treemap.js"
+}
