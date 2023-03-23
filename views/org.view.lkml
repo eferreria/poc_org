@@ -4,9 +4,12 @@ derived_table: {
     select *
     , ROUND(RAND()*10) as fte_rand
     , ROUND(RAND()*1000,0) as job_code_rand
+    , ROUND(RAND()*4 + 1) as product_line
+    , ROUND(RAND()*3 + 1) as business_line
     from `looker-private-demo.thelook.users`
     where city is not null and state is not null and country = 'USA'
-    and EXTRACT(year from created_at) > 2022
+    and EXTRACT(year from created_at) > 2021
+    AND cast(right(cast(abs(farm_fingerprint(city)) as string),1) as numeric) > 5
     ;;
     datagroup_trigger: default_datagroup
   }
@@ -14,6 +17,7 @@ derived_table: {
   # drill_fields: [id]
 
   dimension: id {
+    group_label: "Employee Demographics"
     primary_key: yes
     type: number
     label: "Employee ID"
@@ -39,38 +43,46 @@ derived_table: {
   }
 
   dimension: state {
+    group_label: "Employee Demographics"
     type: string
-    hidden: yes
+    map_layer_name: us_states
+    # hidden: yes
     sql: ${TABLE}.state ;;
   }
 
 
   dimension: email {
+    group_label: "Employee Demographics"
     type: string
     sql: ${TABLE}.email ;;
   }
 
   dimension: first_name {
+    group_label: "Employee Demographics"
     type: string
     sql: INITCAP(${TABLE}.first_name) ;;
   }
 
   dimension: gender {
-    hidden: yes
+    group_label: "Employee Demographics"
+    # hidden: yes
     type: string
     sql: ${TABLE}.gender ;;
   }
 
   dimension: last_name {
+    group_label: "Employee Demographics"
     type: string
     sql: INITCAP(${TABLE}.last_name) ;;
   }
   dimension: full_name {
+    group_label: "Employee Demographics"
     type: string
     sql: ${last_name} || ', ' || ${first_name} ;;
   }
 
   dimension: worker_type {
+    group_label: "Employee Demographics"
     type: string
     sql:
     case when ${core_dev_fte} = 1 OR ${core_prod_fte} = 1 or ${ma_one_time_fte} = 1 then 'Employee' else 'Contingent Worker' end
@@ -78,23 +90,15 @@ derived_table: {
   }
 
   dimension: contingent_worker_supplier {
+    group_label: "Employee Demographics"
     type: string
     sql:
     case when ${core_dev_fte} = 1 OR ${core_prod_fte} = 1 or ${ma_one_time_fte} = 1 then '' else 'Nationwide Contract Workers' end
     ;;
   }
 
-  dimension: company {
-    type: number
-    sql: right(cast(abs(farm_fingerprint(${country})) as string),3) ;;
-  }
-
-  dimension: division {
-    type: number
-    sql: round(cast(right(cast(abs(farm_fingerprint(${state})) as string),1) as numeric)/2) ;;
-  }
-
   dimension: funding_organization {
+    group_label: "Company, Division & Cost Center"
     type: string
     sql:
     case ${division}
@@ -108,7 +112,20 @@ derived_table: {
     ;;
   }
 
+  dimension: company {
+    group_label: "Company, Division & Cost Center"
+    type: number
+    sql: right(cast(abs(farm_fingerprint(${country})) as string),3) ;;
+  }
+
+  dimension: division {
+    group_label: "Company, Division & Cost Center"
+    type: number
+    sql: round(cast(right(cast(abs(farm_fingerprint(${state})) as string),1) as numeric)/2) ;;
+  }
+
   dimension: cost_center {
+    group_label: "Company, Division & Cost Center"
     type: number
     sql: right(cast(abs(farm_fingerprint(${city})) as string),5) ;;
   }
@@ -120,21 +137,68 @@ derived_table: {
   }
 
   dimension: business_line {
+    group_label: "Business, Product & Platform"
     type: string
-    sql: ${country} || ' LOB' ;;
+    sql:
+    case ${TABLE}.business_line
+      when 1 then 'AI Consulting'
+      when 2 then 'Blockchain Development'
+      when 3 then 'Cybersecurity Consulting'
+      else 'Data Analytics Services'
+    end
+    ;;
   }
 
   dimension: product_line {
+    group_label: "Business, Product & Platform"
     type: string
-    sql: 'State of ' || ${state} || ' Product Line' ;;
+    # sql: 'State of ' || ${state} || ' Product Line' ;;
+    sql:
+    case ${TABLE}.business_line
+      when 1 then -- 'AI Consulting'
+        case ${TABLE}.product_line
+          when 1 then 'AI-powered customer service'
+          when 2 then 'AI-powered fraud detection'
+          when 3 then 'AI-powered marketing'
+          when 4 then 'AI-powered sales'
+          else 'AI-powered supply chain management'
+        end
+      when 2 then -- 'Blockchain Development'
+        case ${TABLE}.product_line
+          when 1 then 'Blockchain-based payment systems'
+          when 2 then 'Blockchain-based asset management systems'
+          when 3 then 'Blockchain-based supply chain management systems'
+          when 4 then 'Blockchain-based identity management systems'
+          else 'Blockchain-based voting systems'
+        end
+      when 3 then -- 'Cybersecurity Consulting'
+        case ${TABLE}.product_line
+          when 1 then 'Cybersecurity assessments'
+          when 2 then 'Cybersecurity training'
+          when 3 then 'Cybersecurity audits'
+          when 4 then 'Cybersecurity compliance'
+          else 'Cybersecurity incident response'
+        end
+      else  -- 'Data Analytics Services'
+        case ${TABLE}.product_line
+          when 1 then 'Data visualization'
+          when 2 then 'Data mining'
+          when 3 then 'Machine learning'
+          when 4 then 'Natural language processing'
+          else 'Text analytics'
+        end
+    end ;;
   }
 
   dimension: platform {
+    group_label: "Business, Product & Platform"
     type: string
-    sql: 'City of ' || ${city} || ' Platform' ;;
+    # sql: 'Project ' || ${state} ;;
+    sql: 'Project-'||${TABLE}.business_line||${TABLE}.product_line||CAST(ROUND(RAND()*1+1)AS string) ;;
   }
 
   dimension: job_profile {
+    group_label: "Employee Demographics"
     type: string
     sql:
     case
@@ -165,42 +229,49 @@ derived_table: {
   }
 
   dimension: core_prod_fte  {
+    group_label: "CORE, PI & One Time"
     label: "Core PROD (COGS) FTE"
     sql:  case when ${fte_rand} >= 0 and ${fte_rand} < 6 then 1 else 0 end  ;;
   }
 
   dimension: core_prod_cte {
+    group_label: "CORE, PI & One Time"
     label: "Core PROD (COGS) CTE"
     sql:  case when ${fte_rand} >= 6 and ${fte_rand} < 5 then 1 else 0 end  ;;
   }
 
   dimension: core_dev_fte {
+    group_label: "CORE, PI & One Time"
     sql:  case when ${fte_rand} >= 5 and ${fte_rand} < 8 then 1 else 0 end  ;;
     label: "Core DEV (PI) FTE"
   }
 
   dimension: core_dev_cte {
+    group_label: "CORE, PI & One Time"
     sql:  case when ${fte_rand} >= 8 and ${fte_rand} < 9 then 1 else 0 end  ;;
     label: "Core DEV (PI) CTE"
   }
 
   dimension: ma_one_time_fte  {
+    group_label: "CORE, PI & One Time"
     sql:  case when ${fte_rand} >= 9 and ${fte_rand} < 10 then 1 else 0 end  ;;
     label: "M&A One Time FTE"
   }
 
   dimension: ma_one_time_cte  {
+    group_label: "CORE, PI & One Time"
     sql:  case when ${fte_rand} >= 10 and ${fte_rand} < 11 then 1 else 0 end  ;;
     label: "M&A One Time CTE"
   }
 
   dimension: fte_rand {
-    # hidden: yes
+    hidden: yes
     type: number
     sql: ${TABLE}.fte_rand ;;
   }
 
   dimension: dev_vs_cogs {
+    group_label: "CORE, PI & One Time"
     label: "Dev vs COGS"
     type: string
     sql:
@@ -214,9 +285,15 @@ derived_table: {
 
 
   measure: count {
+    hidden: yes
     type: count
     # drill_fields: [detail*]
   }
+
+  # measure: total_fte {
+
+  # }
+
 
   measure: total_one_time{
     label: "Total One Time FTE & CTE"
