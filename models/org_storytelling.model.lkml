@@ -4,4 +4,9 @@ include: "/views/*.view.lkml"                # include all views in the views/ f
 # include: "/**/*.view.lkml"                 # include all views in this project
 # include: "my_dashboard.dashboard.lookml"   # include a LookML dashboard called my_dashboard
 
+datagroup: default_datagroup {
+  sql_trigger: select extract(month from current_date) ;;
+
+}
+
 explore: org {}

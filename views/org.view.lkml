@@ -6,8 +6,9 @@ derived_table: {
     , ROUND(RAND()*1000,0) as job_code_rand
     from `looker-private-demo.thelook.users`
     where city is not null and state is not null and country = 'USA'
+    and EXTRACT(year from created_at) > 2022
     ;;
-  #   datagroup_trigger: core_default_datagroup
+    datagroup_trigger: default_datagroup
   }
   # sql_table_name: `looker-private-demo.thelook.users`;;
   # drill_fields: [id]
