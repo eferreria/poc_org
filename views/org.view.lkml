@@ -147,6 +147,7 @@ derived_table: {
       else 'Data Analytics Services'
     end
     ;;
+    drill_fields: [business_line, product_line, platform]
   }
 
   dimension: product_line {
@@ -188,6 +189,7 @@ derived_table: {
           else 'Text analytics'
         end
     end ;;
+    drill_fields: [business_line, product_line, platform]
   }
 
   dimension: platform {
@@ -195,6 +197,7 @@ derived_table: {
     type: string
     # sql: 'Project ' || ${state} ;;
     sql: 'Project-'||${TABLE}.business_line||${TABLE}.product_line||CAST(ROUND(RAND()*1+1)AS string) ;;
+    drill_fields: [business_line, product_line, platform]
   }
 
   dimension: job_profile {
@@ -281,6 +284,35 @@ derived_table: {
       else 'One Time (PI)'
     end
     ;;
+  }
+
+  parameter: business_product_platform {
+    label: "Business, Product & Platform Selector"
+    type: unquoted
+    allowed_value: {
+      label: "Business Line"
+      value: "business_line"
+    }
+    allowed_value: {
+      label: "Product Line"
+      value: "product_line"
+    }
+    allowed_value: {
+      label: "Platform"
+      value: "platform"
+    }
+  }
+
+  dimension: business_product_platform_selection {
+    label: "User Selection (Business, Product, Platform)"
+    sql:
+    {% if business_product_platform._parameter_value == 'business_line'%} ${business_line}
+    {% elsif business_product_platform._parameter_value == 'product_line' %} ${product_line}
+    {% elsif business_product_platform._parameter_value == 'platform'%} ${platform}
+    {% else %} ${business_line}
+    {% endif %}
+    ;;
+    drill_fields: [business_line, product_line, platform]
   }
 
 
