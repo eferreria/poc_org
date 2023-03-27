@@ -132,7 +132,7 @@ derived_table: {
 
   dimension_group: reduction {
     type: time
-    timeframes: [raw, date, month, quarter, year]
+    timeframes: [raw, date, week, month, quarter, year]
     sql: ${TABLE}.created_at ;;
   }
 
@@ -315,6 +315,26 @@ derived_table: {
     drill_fields: [business_line, product_line, platform]
   }
 
+  parameter: time_series_selector {
+    label: "Time Series Selector"
+    type: unquoted
+    allowed_value: { label: "Date" value: "date" }
+    allowed_value: { label: "Week" value: "week" }
+    allowed_value: { label: "Month" value: "month" }
+    allowed_value: { label: "Year" value: "year" }
+  }
+
+  dimension: selected_time_series {
+    sql:
+    {% if time_series_selector._parameter_value == 'date' %} ${reduction_date}
+    {% elsif time_series_selector._parameter_value == 'week' %} ${reduction_week}
+    {% elsif time_series_selector._parameter_value == 'month' %} ${reduction_month}
+    {% elsif time_series_selector._parameter_value == 'quarter' %} ${reduction_quarter}
+    {% else %} ${reduction_year}
+    {% endif %}
+    ;;
+  }
+
   parameter: measure_selector {
     type: unquoted
     label: "Measure Selector"
@@ -324,6 +344,7 @@ derived_table: {
     allowed_value: { label:"Total Core DEV (PI)" value:"total_core_dev"}
     allowed_value: { label:"Total Core" value:"total_core"}
     allowed_value: { label: "Total One Time + Total Core" value: "total_one_time_core"}
+    default_value: "total_one_time_core"
   }
 
   measure: dynamic_measure {
