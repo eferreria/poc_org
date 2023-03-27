@@ -315,17 +315,39 @@ derived_table: {
     drill_fields: [business_line, product_line, platform]
   }
 
+  parameter: measure_selector {
+    type: unquoted
+    label: "Measure Selector"
+    allowed_value: { label: "Total Headcount" value: "total_hc"}
+    allowed_value: { label:"Total One Time" value:"total_one_time"}
+    allowed_value: { label:"Total Core Prod (COGS)" value:"total_core_prod"}
+    allowed_value: { label:"Total Core DEV (PI)" value:"total_core_dev"}
+    allowed_value: { label:"Total Core" value:"total_core"}
+    allowed_value: { label: "Total One Time + Total Core" value: "total_one_time_core"}
+  }
+
+  measure: dynamic_measure {
+    label_from_parameter: measure_selector
+    type: number
+    sql:
+    {% if measure_selector._parameter_value == 'total_hc' %} ${count}
+    {% elsif measure_selector._parameter_value == 'total_one_time' %} ${total_one_time}
+    {% elsif measure_selector._parameter_value == 'total_core_prod' %} ${total_core_prod}
+    {% elsif measure_selector._parameter_value == 'total_core_dev' %} ${total_core_dev}
+    {% elsif measure_selector._parameter_value == 'total_core' %} ${total_core}
+    {% elsif measure_selector._parameter_value == 'total_one_time_core' %} ${total_one_time_core}
+    {% else %} ${total_one_time_core}
+    {% endif %}
+    ;;
+  }
+
 
   measure: count {
-    hidden: yes
+    label: "Total Headcount"
+    # hidden: yes
     type: count
     # drill_fields: [detail*]
   }
-
-  # measure: total_fte {
-
-  # }
-
 
   measure: total_one_time{
     label: "Total One Time FTE & CTE"
@@ -352,7 +374,7 @@ derived_table: {
   }
 
   measure: total_one_time_core {
-    label: " Total One Time + Total Core"
+    label: "Total One Time + Total Core"
     type: number
     sql: ${total_one_time} + ${total_core} ;;
   }
