@@ -51,11 +51,11 @@ derived_table: {
   }
 
 
-  dimension: email {
-    group_label: "Employee Demographics"
-    type: string
-    sql: ${TABLE}.email ;;
-  }
+  # dimension: email {
+  #   group_label: "Employee Demographics"
+  #   type: string
+  #   sql: ${TABLE}.email ;;
+  # }
 
   dimension: first_name {
     group_label: "Employee Demographics"
@@ -368,29 +368,34 @@ derived_table: {
     # hidden: yes
     type: count
     # drill_fields: [detail*]
+    drill_fields: [employee_details*]
   }
 
   measure: total_one_time{
     label: "Total One Time FTE & CTE"
     type: sum
     sql: ${ma_one_time_cte} + ${ma_one_time_fte} ;;
+    drill_fields: [employee_details*]
   }
 
   measure: total_core_prod {
     label: "Total Core PROD (COGS)"
     type: sum
     sql: ${core_prod_cte} + ${core_prod_fte} ;;
+    drill_fields: [employee_details*]
   }
 
   measure: total_core_dev {
     label: "Total Core DEV (PI)"
     type: sum
     sql: ${core_dev_cte} + ${core_dev_fte} ;;
+    drill_fields: [employee_details*]
   }
 
   measure: total_core {
     type: number
     sql: ${total_core_dev} + ${total_core_prod} ;;
+    drill_fields: [employee_details*]
 
   }
 
@@ -398,6 +403,20 @@ derived_table: {
     label: "Total One Time + Total Core"
     type: number
     sql: ${total_one_time} + ${total_core} ;;
+    link: {
+      label: "{% if business_product_platform._parameter_value == 'business_line'%}{{business_product_platform_selection._value}} Summary {%endif%}"
+      url: "{% if business_product_platform._parameter_value == 'business_line'%}/dashboards/285?{{'Business Line'| url_encode}}={{business_product_platform_selection._value}} {%endif%}"
+    }
+    drill_fields: [employee_details*]
+  }
+
+  measure: total_cost_centers {
+    type: count_distinct
+    sql: ${cost_center} ;;
+  }
+
+  set: employee_details {
+    fields: [cost_center, full_name, worker_type, job_profile]
   }
 
 
