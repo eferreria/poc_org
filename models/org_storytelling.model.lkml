@@ -1,4 +1,4 @@
-connection: "bigquery" #for gcpl234
+connection: "looker_private_demo" #for gcpl234
 # connection: "ef-bq"
 
 include: "/views/*.view.lkml"                # include all views in the views/ folder in this project

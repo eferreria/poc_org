@@ -11,7 +11,7 @@ derived_table: {
     and EXTRACT(year from created_at) > 2021
     AND cast(right(cast(abs(farm_fingerprint(city)) as string),1) as numeric) > 5
     ;;
-    datagroup_trigger: default_datagroup
+    # datagroup_trigger: default_datagroup
   }
   # sql_table_name: `looker-private-demo.thelook.users`;;
   # drill_fields: [id]

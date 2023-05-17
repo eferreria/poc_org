@@ -18,3 +18,9 @@ visualization: {
   label: "Force Directed Graph"
   file: "visualizations/forced_directed.js"
 }
+
+visualization: {
+  id: "org_chart"
+  label: "Org Chart"
+  file: "visualizations/custom_collapsible_tree_WIP.js"
+}
