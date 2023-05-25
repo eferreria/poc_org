@@ -19,8 +19,25 @@ visualization: {
   file: "visualizations/forced_directed.js"
 }
 
+# visualization: {
+#   id: "org_chart"
+#   label: "Org Chart"
+#   file: "visualizations/custom_collapsible_tree_WIP.js"
+# }
+
+
+constant: VIS_LABEL {
+  value: "Org Chart"
+  export: override_optional
+}
+
+constant: VIS_ID {
+  value: "org_chart"
+  export:  override_optional
+}
+
 visualization: {
-  id: "org_chart"
-  label: "Org Chart"
-  file: "visualizations/custom_collapsible_tree_WIP.js"
+  id: "@{VIS_ID}"
+  file: "visualizations/org_chart.js"
+  label: "@{VIS_LABEL}"
 }
