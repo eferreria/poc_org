@@ -41,3 +41,10 @@ visualization: {
   file: "visualizations/org_chart.js"
   label: "@{VIS_LABEL}"
 }
+
+
+visualization: {
+  id: "eric_report_table_from_mkpl"
+  file: "report_table.js"
+  label: "Eric's Report Table"
+}
